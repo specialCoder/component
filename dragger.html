@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>拖拽</title>
+<meta name="description" content="">
+<meta name="keywords" content="">
+<link href="" rel="stylesheet">
+<style type="text/css" media="screen">
+    .draggable{
+        height:100px;
+        width:100px;
+        background:orange;
+        position:absolute;/*必须*/
+    }
+</style>
+</head>
+<body>
+    <div class="draggable"></div>
+    <script type="text/javascript" src="EventUtil.js"></script>
+    <script type="text/javascript">
+    var dragDrop=function(){
+        var dragging=null,//发生拖放的目标元素
+            disX=0,
+            disY=0;
+        function handleEvent(event){
+            //获取事件和目标
+             event=window.event|| event;
+             var target=EventUtil.getTarget(event);
+            //确定事件类型
+            switch(event.type){
+                case "mousedown":
+                    if(target.className.indexOf("draggable")>-1){//为className值为draggable的元素提供拖放功能
+                        dragging=target;//确定拖放目标
+                        //解决鼠标箭头总是出现在左上角的问题
+                        disX=event.clientX-target.offsetLeft;
+                        disY=event.clientY-target.offsetTop;
+                    }
+                    break;
+                case "mousemove" :
+                    var l=event.clientX-disX,
+                        t=event.clientY-disY;
+                    if(dragging!=null){
+                        //磁性吸附
+                        if(l<50){
+                            l=0;
+                        }else if(l>EventUtil.getCompat(dragging.clientWidth)-dragging.offsetWidth-50){
+                            l=EventUtil.getCompat(dragging.clientWidth)-dragging.offsetWidth
+                        }
+                        if(t<50){
+                            t=0;
+                        }else if(t>EventUtil.getCompat(dragging.clientHeight)-50){
+                            t=EventUtil.getCompat(dragging.clientHeight)
+                        }
+                        //目标元素跟随，实现拖放
+                    dragging.style.left=l+'px';
+                    dragging.style.top=t+'px';
+
+                    }
+                    break;
+                case "mouseup":
+                    dragging=null;//鼠标按键松开时，取消拖放
+                    break;
+            }
+        };
+        //为元素绑定鼠标事件
+        return {
+            enable:function(){
+                EventUtil.addHandler(document,"mousedown",handleEvent);
+                EventUtil.addHandler(document,"mousemove",handleEvent);
+                EventUtil.addHandler(document,"mouseup",handleEvent);
+            },
+            disable:function(){
+                EventUtil.removeHandler(document,"mousedown",handleEvent);
+                EventUtil.removeHandler(document,"mousemove",handleEvent);
+                EventUtil.removeHandler(document,"mouseup",handleEvent);
+            }
+        }
+
+    }();
+    dragDrop.enable();//执行拖放函数
+    </script>
+</body>
+</html>
